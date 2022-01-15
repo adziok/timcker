@@ -1,9 +1,16 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { CognitoOauthGuard } from './CognitoOauthGuard';
+import { JwtService } from '../jwt/JwtService';
+import { AuthConfigService } from '../AuthConfigService';
 
 @Controller('auth/cognito')
 export class CognitoOauthController {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: AuthConfigService,
+  ) {}
+
   @Get()
   @UseGuards(CognitoOauthGuard)
   async cognitoAuth(@Req() _req: Request) {
@@ -13,10 +20,12 @@ export class CognitoOauthController {
   @Get('redirect')
   @UseGuards(CognitoOauthGuard)
   async cognitoAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    // Here we can issue a JWT token to manage the user session from the app
-    // For now, we'll just show the user object
-    console.log((req as any).user);
-    res.redirect('https://google.com');
-    // return (req as any).user;
+    const signedData = this.jwtService.sign((req as any).user);
+
+    res.redirect(
+      this.configService.get('successCallbackUrl') +
+        '?access_token=' +
+        signedData.accessToken,
+    );
   }
 }

@@ -1,4 +1,4 @@
-type TAccountId = string;
+export type TAccountId = string;
 
 export type TAccount = {
   id: TAccountId;

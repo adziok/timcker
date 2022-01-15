@@ -1,5 +1,12 @@
 import { Module } from '@nestjs/common';
-import { IAccountsApi } from './AccountsApi';
+import {
+  IAccountsApi,
+  TAccount,
+  TAccountId,
+  TCreateAccount,
+} from './AccountsApi';
+
+const users: Record<string, Partial<TAccount>> = {};
 
 @Module({
   imports: [],
@@ -7,8 +14,14 @@ import { IAccountsApi } from './AccountsApi';
   providers: [
     {
       provide: IAccountsApi,
-      useValue: () => {
-        'h';
+      useValue: {
+        async createAccount(account: TCreateAccount): Promise<TAccountId> {
+          users[account.email] = account;
+          return '123';
+        },
+        async getAccountByEmail(email: string): Promise<TAccount> {
+          return users[email] as any;
+        },
       },
     },
   ],

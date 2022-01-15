@@ -57,14 +57,12 @@ export class CognitoOauthStrategy extends PassportStrategy(
       )
     ).data;
 
-    const [provider, providerId] = userinfo.username.split('_');
-
     let user = await this.accountsApi.getAccountByEmail(userinfo.email);
     if (!user) {
       await this.accountsApi.createAccount({
-        providerName: provider,
-        providerId,
-        username: userinfo.name,
+        providerName: 'cognito',
+        providerId: userinfo.sub,
+        username: userinfo.username,
         email: userinfo.email,
       });
       user = await this.accountsApi.getAccountByEmail(userinfo.email);

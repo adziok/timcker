@@ -27,6 +27,8 @@ import { TAuthConfig } from './auth/AuthConfigService';
             clientId: configService.get<string>('COGNITO_CLIENT_ID'),
             clientSecret: configService.get<string>('COGNITO_CLIENT_SECRET'),
           },
+          successCallbackUrl: configService.get<string>('AUTH_SUCCESS_URL'),
+          failCallbackUrl: configService.get<string>('AUTH_FAILURE_URL'),
         };
       },
     }),

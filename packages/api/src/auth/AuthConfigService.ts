@@ -14,11 +14,14 @@ export type TAuthConfig = {
     clientSecret: string;
     callbackUrl: string;
   };
+  successCallbackUrl: string;
+  failCallbackUrl: string;
 };
 
 type TDotJoinedAuthConfig =
   | `jwt.${keyof TAuthConfig['jwt']}`
-  | `cognito.${keyof TAuthConfig['cognito']}`;
+  | `cognito.${keyof TAuthConfig['cognito']}`
+  | `${keyof TAuthConfig}`;
 
 @Injectable()
 export class AuthConfigService {
