@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
+import { CognitoModule } from './auth/cognito/cognito.module';
+import { JwtModule } from './auth/jwt/jwt.module';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 @Module({
-  imports: [],
+  imports: [CognitoModule, JwtModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule {}
