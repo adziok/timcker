@@ -2,15 +2,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-oauth2';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-
-const USER_POOL_ID = 'eu-central-1_jza43twKu';
-
-const COGNITO_REGION = 'eu-central-1';
-const COGNITO_CLIENT_ID = '6r5i7bhj55gvkoq363p0077ou3';
-const COGNITO_CLIENT_SECRET =
-  '13p9n9l3udu06qnls5c8l9t71df84qd182jk5t8ev6i9lmtmkmaq';
-const COGNITO_CALLBACK_URL = 'http://localhost:3000/auth/cognito/redirect';
-const OAUTH_COGNITO_DOMAIN = 'timcker';
+import { IAccountsApi } from '../../accounts/AccountsApi';
+import { AuthConfigService } from '../AuthConfigService';
 
 @Injectable()
 export class CognitoOauthStrategy extends PassportStrategy(
@@ -19,22 +12,25 @@ export class CognitoOauthStrategy extends PassportStrategy(
 ) {
   private domain: string;
 
-  constructor() {
+  constructor(
+    private readonly accountsApi: IAccountsApi,
+    private readonly config: AuthConfigService,
+  ) {
     super({
       authorizationURL: CognitoOauthStrategy.authorizationUrl(
-        OAUTH_COGNITO_DOMAIN,
-        COGNITO_REGION,
+        config.get('cognito.domain'),
+        config.get('cognito.region'),
       ),
       tokenURL: CognitoOauthStrategy.tokenUrl(
-        OAUTH_COGNITO_DOMAIN,
-        COGNITO_REGION,
+        config.get('cognito.domain'),
+        config.get('cognito.region'),
       ),
-      clientID: COGNITO_CLIENT_ID,
-      clientSecret: COGNITO_CLIENT_SECRET,
-      callbackURL: COGNITO_CALLBACK_URL,
+      clientID: config.get('cognito.clientId'),
+      clientSecret: config.get('cognito.clientSecret'),
+      callbackURL: config.get('cognito.callbackUrl'),
     });
-    this.domain = OAUTH_COGNITO_DOMAIN;
-    this.region = COGNITO_REGION;
+    this.domain = config.get('cognito.domain');
+    this.region = config.get('cognito.region');
   }
 
   static baseUrl(domain: string, region: string): string {
@@ -54,9 +50,6 @@ export class CognitoOauthStrategy extends PassportStrategy(
   }
 
   async validate(accessToken: string) {
-    // Here the `id_token` is also received: https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html
-    // But it's not supported by passport-oauth2, only `access_token` is received
-    // Therefore another call is made to the userinfo endpoint
     const userinfo = (
       await axios.get(
         CognitoOauthStrategy.userInfoUrl(this.domain, this.region),
@@ -66,17 +59,17 @@ export class CognitoOauthStrategy extends PassportStrategy(
 
     const [provider, providerId] = userinfo.username.split('_');
 
-    return userinfo;
-    // let user = await this.usersService.findOneByProvider(provider, providerId);
-    // if (!user) {
-    //   user = await this.usersService.create({
-    //     provider,
-    //     providerId,
-    //     name: userinfo.name,
-    //     username: userinfo.email,
-    //   });
-    // }
-    //
-    // return user;
+    let user = await this.accountsApi.getAccountByEmail(userinfo.email);
+    if (!user) {
+      await this.accountsApi.createAccount({
+        providerName: provider,
+        providerId,
+        username: userinfo.name,
+        email: userinfo.email,
+      });
+      user = await this.accountsApi.getAccountByEmail(userinfo.email);
+    }
+
+    return user;
   }
 }

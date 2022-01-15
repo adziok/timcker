@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
-import { JwtPayload } from './jwt.strategy';
+import { JwtPayload } from './JwtStrategy';
+import { TAccount } from '../../accounts/AccountsApi';
 
 @Injectable()
 export class JwtService {
-  constructor(private jwtService: NestJwtService) {}
+  constructor(private readonly jwtService: NestJwtService) {}
 
-  login(user: any) {
+  sign(user: TAccount) {
     const payload: JwtPayload = { username: user.username, sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),

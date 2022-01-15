@@ -1,6 +1,6 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { CognitoOauthGuard } from './cognito-oauth.guard';
+import { CognitoOauthGuard } from './CognitoOauthGuard';
 
 @Controller('auth/cognito')
 export class CognitoOauthController {
