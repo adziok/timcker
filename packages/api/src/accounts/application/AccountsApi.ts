@@ -1,3 +1,5 @@
+import { AsyncResult } from '../../common';
+
 export type TAccountId = string;
 
 export type TAccount = {
@@ -15,6 +17,6 @@ export type TCreateAccount = {
 };
 
 export abstract class IAccountsApi {
-  abstract createAccount(account: TCreateAccount): Promise<TAccountId>;
-  abstract getAccountByEmail(email: string): Promise<TAccount>;
+  abstract createAccount(account: TCreateAccount): AsyncResult<TAccountId>;
+  abstract getAccountByEmail(email: string): AsyncResult<TAccount>;
 }

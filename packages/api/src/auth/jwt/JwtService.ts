@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { JwtPayload } from './JwtStrategy';
-import { TAccount } from '../../accounts/AccountsApi';
+import { TAccount } from '../../accounts/application/AccountsApi';
 
 @Injectable()
 export class JwtService {

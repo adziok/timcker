@@ -2,7 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-oauth2';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { IAccountsApi } from '../../accounts/AccountsApi';
+import { IAccountsApi } from '../../accounts/application/AccountsApi';
 import { AuthConfigService } from '../AuthConfigService';
 
 @Injectable()
@@ -58,7 +58,7 @@ export class CognitoOauthStrategy extends PassportStrategy(
     ).data;
 
     let user = await this.accountsApi.getAccountByEmail(userinfo.email);
-    if (!user) {
+    if (user.isError()) {
       await this.accountsApi.createAccount({
         providerName: 'cognito',
         providerId: userinfo.sub,

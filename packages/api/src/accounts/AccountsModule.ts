@@ -1,28 +1,20 @@
 import { Module } from '@nestjs/common';
-import {
-  IAccountsApi,
-  TAccount,
-  TAccountId,
-  TCreateAccount,
-} from './AccountsApi';
-
-const users: Record<string, Partial<TAccount>> = {};
+import { IAccountsApi } from './application/AccountsApi';
+import { AccountService } from './application/AccountService';
+import { AccountRepository } from './application/AccountRepository';
+import { AccountInMemoryRepository } from './infra/AccountInMemoryRepository';
 
 @Module({
   imports: [],
   controllers: [],
   providers: [
     {
+      provide: AccountRepository,
+      useClass: AccountInMemoryRepository,
+    },
+    {
       provide: IAccountsApi,
-      useValue: {
-        async createAccount(account: TCreateAccount): Promise<TAccountId> {
-          users[account.email] = account;
-          return '123';
-        },
-        async getAccountByEmail(email: string): Promise<TAccount> {
-          return users[email] as any;
-        },
-      },
+      useClass: AccountService,
     },
   ],
   exports: [IAccountsApi],
